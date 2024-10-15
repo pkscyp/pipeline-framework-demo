@@ -1,0 +1,57 @@
+autoAck: false
+className: MessageHttpFn.HandleMessageByHttp
+fqfn: public/default/receiveLatLng
+inputs:
+  - persistent://public/default/receiveLatLng
+name: receiveLatLng
+namespace: default
+output: persistent://public/default/findAddress
+processingGuarantees: MANUAL
+retainKeyOrdering: true
+retainOrdering: false
+runtime: PYTHON
+tenant: public
+---
+autoAck: false
+className: MessageHttpFn.HandleMessageByHttp
+fqfn: public/default/findAddress
+inputs:
+  - persistent://public/default/findAddress
+name: findAddress
+namespace: default
+output: persistent://public/default/findTimezone
+processingGuarantees: MANUAL
+retainKeyOrdering: true
+retainOrdering: false
+runtime: PYTHON
+tenant: public
+---
+autoAck: false
+className: MessageHttpFn.HandleMessageByHttp
+fqfn: public/default/findTimezone
+inputs:
+  - persistent://public/default/findTimezone
+name: findTimezone
+namespace: default
+output: persistent://public/default/findDistance
+processingGuarantees: MANUAL
+retainKeyOrdering: true
+retainOrdering: false
+runtime: PYTHON
+tenant: public
+---
+autoAck: false
+className: MessageHttpFn.HandleMessageByHttp
+fqfn: public/default/findDistance
+inputs:
+  - persistent://public/default/findDistance
+name: findDistance
+namespace: default
+output: persistent://public/default/finalout
+processingGuarantees: MANUAL
+retainKeyOrdering: true
+retainOrdering: false
+runtime: PYTHON
+tenant: public
+---
+

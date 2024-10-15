@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+    broker:
+        image: synergy/pulsar:3.3.0
+        container_name: broker
+        hostname: broker 
+        restart: on-failure
+        user: "0:0"
+        build:
+            context: .
+            dockerfile: ./Dockerfile.pulsar
+        ports:
+            - '8088:8080'
+            - '5191:4181'
+            - '6650:6650'
+        networks:
+            - pulsarnet
+        extra_hosts:
+            - "host.docker.internal:host-gateway" 
+        volumes:
+            - /tmp/fn_repos:/fn_repos
+            - pulsarstore:/pulsar/data
+        environment:
+            - BK_STORAGE_URL=bk://127.0.0.1:4181
+            - PF_containerFactory=process
+            - PF_pulsarServiceUrl=pulsar://localhost:6650
+            - PF_pulsarWebServiceUrl=http://localhsot:8080
+            - PF_pulsarFunctionsCluster=ge-fence
+            - PF_workerId=stndfw
+            - PF_workerHostname=broker
+            - PF_workerPort=8080
+            - PF_numFunctionPackageReplicas=1        
+            - clusterName=ge-fence
+            - managedLedgerDefaultEnsembleSize=1
+            - brokerDeleteInactiveTopicsEnabled=false
+            - managedLedgerDefaultWriteQuorum=1
+            - managedLedgerDefaultAckQuorum=1
+            - advertisedAddress=localhost
+            - advertisedListeners=external:pulsar://localhost:6650
+            - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
+            - PULSAR_LOG_FILE=pulsar-standfw-broker.log
+            - PULSAR_LOG_IMMEDIATE_FLUSH=true 
+            - PULSAR_ROUTING_APPENDER_DEFAULT=RollingFile 
+            - managedLedgerMaxEntriesPerLedger=5000
+            - managedLedgerCursorMaxEntriesPerLedger=5000
+            - managedLedgerMaxSizePerLedgerMbytes=200
+            - managedLedgerMinLedgerRolloverTimeMinutes=1
+            - managedLedgerMaxLedgerRolloverTimeMinutes=2
+            - webServiceUrl=http://broker:8080/
+            - brokerServiceUrl=pulsar://broker:6650/
+            - numIOThreads=4
+            - numExecutorThreadPoolSize=8
+            - numHttpServerThreads=4
+            - enablePackagesManagement=true
+            - functionsWorkerEnablePackageManagement=false
+            - PULSAR_STANDALONE_USE_ZOOKEEPER=1
+
+        command:
+            - bash 
+            - -c 
+            - |
+              echo "" >> conf/standalone.conf
+              echo logSizeLimit=104857600 >> conf/standalone.conf
+              echo journalMaxSizeMB=100 >> conf/standalone.conf
+              echo journalMaxBackups=2 >> conf/standalone.conf
+              echo httpServerEnabled=true  >> conf/standalone.conf
+              echo httpServerPort=8088 >> conf/standalone.conf
+              echo httpServerClass=org.apache.bookkeeper.http.vertx.VertxHttpServer >> conf/standalone.conf
+              echo installUserCodeDependencies: true >>  conf/standalone.conf
+              echo "" >> conf/standalone.conf
+              bin/gen-yml-from-env.py conf/functions_worker.yml 
+              bin/apply-config-from-env.py conf/client.conf 
+              bin/apply-config-from-env.py conf/standalone.conf
+              exec bin/pulsar standalone 
+
+
+networks:
+  pulsarnet:
+    external: true 
+
+volumes:
+  pulsarstore:
+    driver: local             

@@ -1,0 +1,18 @@
+FROM apachepulsar/pulsar:3.3.0
+
+USER root
+
+WORKDIR /pulsar 
+
+RUN /usr/bin/python3 -m venv mypython
+
+ENV PATH="/pulsar/mypython/bin:$PATH"
+
+ENV PYTHONPATH=/usr/lib/python3.11/site-packages
+ENV PULSAR_FUNCTIONS_EXTRA_DEPS_DIR=/usr/lib/python3.11/site-packages:/pulsar/instances/deps
+RUN pip3 install requests pydantic 
+COPY ./synergypy-1.0-py2.py3-none-any.whl /tmp 
+RUN pip3 install /tmp/synergypy-1.0-py2.py3-none-any.whl
+COPY ./wait_for_it.sh /pulsar/bin
+RUN chmod +x /pulsar/bin/wait_for_it.sh 
+

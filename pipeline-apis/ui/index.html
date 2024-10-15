@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+</head>
+
+<body>
+    <h1>Pipeline-Framework Demo</h1>
+    <p>
+        User need to submit latitude and longitude in WSG84 format. Pipeline has four chained function.
+        Pipeline is not intigrated with any database. it uses openstreetmap api for address resolution.
+        By default latitude and longitude in form are of valid address.
+        <b>Please Note: There is small deviation in latitude longitude of openstreetmap vs google bing map.</b>
+    </p>
+    <ul>
+        <li>Validate Payload has Latitude and Longitude</li>
+        <li>Find Sreet Address associated with geo cordinate</li>
+        <li>Find Sreet Timezone associated with geo cordinate</li>
+        <li>Find Sreet Distance from atlanta office and SF Office associated with geo cordinate</li>
+    </ul>
+    <p> Once pipeline execution finished.. fully processed message appears on browser screen </p>
+
+    <form action="" onsubmit="sendMessage(event)">
+        <label>Latitude</label>
+        <input type="text" id="latitude" autocomplete="off" value="40.0556793" />
+        <label>Longitude</label>
+        <input type="text" id="longitude" autocomplete="off" value="-88.24241235" />
+        <button>Send</button>
+    </form>
+    <ul id='messages'>
+    </ul>
+    <script>
+        var ws = new WebSocket("ws://" + document.location.host + "/ws");
+        ws.onmessage = function (event) {
+            var messages = document.getElementById('messages')
+            var message = document.createElement('li')
+            var content = document.createTextNode(event.data)
+            message.appendChild(content)
+            messages.appendChild(message)
+        };
+        function sendMessage(event) {
+            var latitude = document.getElementById("latitude")
+            var longitude = document.getElementById("longitude")
+            ws.send(JSON.stringify({ 'latitude': parseFloat(latitude.value), 'longitude': parseFloat(longitude.value) }))
+            event.preventDefault()
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+autoAck: false
+className: MessageHttpFn.HandleMessageByHttp
+fqfn: public/default/SendToParterner
+inputs:
+  - persistent://public/default/out_topic
+name: SendToParterner
+namespace: default
+output: persistent://public/default/out_parter
+processingGuarantees: MANUAL
+retainKeyOrdering: true
+retainOrdering: false
+runtime: PYTHON
+tenant: public
+
